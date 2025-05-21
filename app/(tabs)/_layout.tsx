@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
+import { Link, Tabs, router } from 'expo-router';
 import { Pressable } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import CustomNavBar from '@/components/CustomTabBar';
+import { useAuth } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -18,23 +20,32 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    // Ensure user is authenticated for this route
+    if (!isAuthenticated) {
+      router.replace('/');
+    }
+  }, [isAuthenticated]);
 
   return (
-    <Tabs 
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          elevation: 0,
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
-        },
-      }}
-      initialRouteName="index"
-     tabBar={(props) => <CustomNavBar {...props} />}>
+    <ProtectedRoute>
+      <Tabs 
+        screenOptions={{
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          headerShown: false,
+          tabBarStyle: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: Colors[colorScheme ?? 'light'].background,
+          },
+        }}
+        initialRouteName="index"
+       tabBar={(props) => <CustomNavBar {...props} />}>
 
       <Tabs.Screen
         name="index"
@@ -74,5 +85,6 @@ export default function TabLayout() {
 
 
     </Tabs>
+    </ProtectedRoute>
   );
 }

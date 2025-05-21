@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>22015092534-9tgolmu1seahefn7e399upvpn6b4jdq2.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.22015092534-9tgolmu1seahefn7e399upvpn6b4jdq2</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>22015092534-6e3q5uksp5p6evv7jujbana85dmq7j0t.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBhOg7KEgqeppS2MKQnRLFXEDb3wnUmSSk</string>
+	<key>GCM_SENDER_ID</key>
+	<string>22015092534</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.leazzy.app</string>
+	<key>PROJECT_ID</key>
+	<string>leazzy</string>
+	<key>STORAGE_BUCKET</key>
+	<string>leazzy.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:22015092534:ios:142de78cb35553d5923597</string>
+	<key>DATABASE_URL</key>
+	<string>https://leazzy-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import  { useState } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, Platform, Alert } from 'react-native';
 import { styled } from 'nativewind';
 import { router } from 'expo-router';

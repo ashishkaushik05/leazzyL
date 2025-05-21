@@ -1,66 +1,131 @@
-import { DUMMY_USER } from '@/constants/DummyData';
-import { useSecureStorage } from '@/hooks/useSecureStorage';
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { usePersistStorage } from '@/hooks/usePersistStorage';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { User as FirebaseUser, updateProfile, getAuth, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
+import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  profileImage?: string;
-};
+interface User {
+  uid: string;
+  displayName: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+  photoURL: string | null;
+}
 
-
-
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (user: FirebaseUser) => void;
   signOut: () => void;
   isLoading: boolean;
+  isAuthenticated: boolean;
   updateUserProfile: (userData: Partial<User>) => Promise<void>;
-};
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useSecureStorage<User | null>('user', DUMMY_USER);
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = usePersistStorage<User | null>('user', null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const signIn = async (email: string, password: string) => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setUser({ 
-      id: '123', 
-      name: 'Ashish Kaushik', 
-      email,
-      // Default profile image
-      profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' 
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+      setIsLoading(true);
+      
+      if (firebaseUser) {
+        const userData: User = {
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName,
+          email: firebaseUser.email,
+          phoneNumber: firebaseUser.phoneNumber,
+          photoURL: firebaseUser.photoURL,
+        };
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+      
+      setIsLoading(false);
     });
-    setIsLoading(false);
+
+    // Cleanup subscription
+    return () => unsubscribe();
+  }, []);
+
+  const signIn = async (firebaseUser: FirebaseUser) => {
+    try {
+      // Get the user's ID token
+      const idToken = await firebaseUser.getIdToken();
+      
+      // Store the token in SecureStore for later use
+      await SecureStore.setItemAsync('authToken', idToken);
+      
+      // Update the user state
+      const userData: User = {
+        uid: firebaseUser.uid,
+        displayName: firebaseUser.displayName,
+        email: firebaseUser.email,
+        phoneNumber: firebaseUser.phoneNumber,
+        photoURL: firebaseUser.photoURL,
+      };
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Error during sign in:', error);
+    }
   };
 
-  const signOut = () => {
-    setUser(null);
+  const signOut = async () => {
+    try {
+      await auth.signOut();
+      setUser(null);
+      setIsAuthenticated(false);
+      // Clear any auth tokens
+      await SecureStore.deleteItemAsync('authToken');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const updateUserProfile = async (userData: Partial<User>) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    if (user) setUser({ ...user, ...userData });
-    setIsLoading(false);
+    try {
+      // Update Firebase user profile if needed
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          displayName: userData.displayName || auth.currentUser.displayName,
+          photoURL: userData.photoURL || auth.currentUser.photoURL,
+        });
+      }
+      if (user) {
+        setUser({ ...user, ...userData });
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signOut, isLoading, updateUserProfile }}>
+    <AuthContext.Provider value={{ user, signIn, signOut, isLoading, isAuthenticated, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
+
+export default AuthContext;

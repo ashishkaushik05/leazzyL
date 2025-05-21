@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { styled } from 'nativewind';
 import { FontAwesome } from '@expo/vector-icons';
@@ -28,7 +28,6 @@ export default function AccountSettingsScreen() {
           text: "Yes, Sign Out",
           onPress: () => {
             signOut();
-            router.replace('/login');
           },
           style: "destructive"
         }

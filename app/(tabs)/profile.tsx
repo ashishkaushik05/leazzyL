@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Image, ScrollView, TouchableOpacity, StyleSheet, View as RNView, SafeAreaView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { styled } from 'nativewind';
@@ -23,6 +23,7 @@ export default function ProfileScreen() {
   const { user, signOut, isLoading } = useAuth();
   // Fallback to DUMMY_USER for development if user is not logged in
   const profileData = user || DUMMY_USER;
+  console.log("Profile Data: ", profileData);
   
   return (
     <StyledSafeAreaView className="flex-1 bg-black">
@@ -42,15 +43,15 @@ export default function ProfileScreen() {
           <StyledView className="bg-transparent flex-row items-center">
             <StyledView className="bg-transparent mr-4">
               <StyledImage
-                source={{ uri: profileData.profileImage }}
+                source={{ uri: profileData.photoURL }}
                 className="w-16 h-16 rounded-full"
                 style={{ backgroundColor: 'lavender' }}
               />
             </StyledView>
             
             <StyledView className='bg-transparent'>
-              <StyledText className="text-white text-xl font-semibold">{profileData.name}</StyledText>
-              <StyledText className="text-gray-400 text-base mt-1">{profileData.phone}</StyledText>
+              <StyledText className="text-white text-xl font-semibold">{profileData.displayName}</StyledText>
+              <StyledText className="text-gray-400 text-base mt-1">{profileData?.phone ?   profileData.phone  : profileData.email }</StyledText>
             </StyledView>
           </StyledView>
         </StyledView>

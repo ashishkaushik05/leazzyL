@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "22015092534",
+    "firebase_url": "https://leazzy-default-rtdb.firebaseio.com",
+    "project_id": "leazzy",
+    "storage_bucket": "leazzy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:22015092534:android:899a55f0a99a1245923597",
+        "android_client_info": {
+          "package_name": "com.leazzy.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "22015092534-sge42adqfjq916u3jcdik6em7fj4m4e7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvd1Re_laDDt1Tw0dybTrmAhSUkItrYdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "22015092534-sge42adqfjq916u3jcdik6em7fj4m4e7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "22015092534-9tgolmu1seahefn7e399upvpn6b4jdq2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.leazzy.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

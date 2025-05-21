@@ -1,6 +1,6 @@
 import { FlatList, SafeAreaView, StatusBar, TextInput, TouchableOpacity, ScrollView, View as RNView } from 'react-native';
 import { Text, View, useThemeColor } from '@/components/Themed';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropertyCard, { PropertyType } from '@/components/PropertyCard';
 import { FontAwesome } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { router } from 'expo-router';
 import { DUMMY_PROPERTIES } from '@/constants/DummyData';
 import FilterModal from '@/components/FilterModal';
 import CircularGradient from '@/components/CircularGradient';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Category data
 const categories = [
@@ -32,14 +33,26 @@ const StyledScrollView = styled(ScrollView);
 // const StyledLinearGradient = styled(LinearGradient);
 
 export default function HomeScreen() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('1');
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  
 
+
+  function redirect(arg0: string) {
+    throw new Error('Function not implemented.');
+  }
+
+  // If user is not yet loaded or not logged in, show minimal content
+  if (!user) {
+    return <StyledView className="flex-1 items-center justify-center"><StyledText className="text-white">Loading...</StyledText></StyledView>;
+  }
+  
   return (
-    <StyledSafeAreaView className="flex-1 pt-2 ">
-      <CircularGradient   />
+    <StyledSafeAreaView className="flex-1 pt-2">
+      <CircularGradient />
       <StatusBar barStyle="light-content" />
       
       {/* Header */}
@@ -120,7 +133,6 @@ export default function HomeScreen() {
           </StyledScrollView>
         </StyledView>
        
-
         {/* Section for Near Kharar area */}
         <StyledView className="mb-5 bg-transparent">
           <StyledText className="text-2xl font-bold ml-4 mb-2 text-dark-text">Near Kharar area</StyledText>

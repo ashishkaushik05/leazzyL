@@ -3,7 +3,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { View } from 'react-native';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -12,6 +12,7 @@ import CustomSplashScreen from '@/components/SplashScreen';
 import { StatusBar } from 'expo-status-bar';
 import { setupTailwind } from '@/utils/setupTailwind';
 import AppProvider from '@/components/AppProvider';
+import { useAuth } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 
 export {
@@ -21,7 +22,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: '/', // Changed to root path
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -59,6 +60,9 @@ export default function RootLayout() {
     prepare();
   }, []);
 
+  // Log app readiness state
+  console.log('App is ready:', appIsReady);
+
   useEffect(() => {
     if (appIsReady && splashAnimationComplete) {
       // Hide the native splash screen once our custom splash is done
@@ -83,8 +87,37 @@ export default function RootLayout() {
       <FavoritesProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen 
+              name="auth/login" 
+              options={{ 
+                headerShown: false,
+                animation: 'slide_from_right'
+              }} 
+            />
+            <Stack.Screen 
+              name="auth/complete-profile" 
+              options={{ 
+                headerShown: false,
+                animation: 'slide_from_right'
+              }} 
+            />
+            <Stack.Screen 
+              name="auth/email-signin" 
+              options={{ 
+                headerShown: false,
+                animation: 'slide_from_right'
+              }} 
+            />
+            <Stack.Screen 
+              name="auth/set-password" 
+              options={{ 
+                headerShown: false,
+                animation: 'slide_from_right'
+              }} 
+            />
           </Stack>
+          <StatusBar style="light" />
         </ThemeProvider>
       </FavoritesProvider>
     </AppProvider>

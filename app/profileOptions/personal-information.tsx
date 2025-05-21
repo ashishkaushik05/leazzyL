@@ -36,7 +36,7 @@ export default function PersonalInformationScreen() {
           className="bg-zinc-800 rounded-xl mb-4 p-4">
           <StyledText className="text-gray-400 text-sm">First name on ID</StyledText>
           <StyledView className="flex-row justify-between items-center mt-1">
-            <StyledText className="text-white text-xl">{user?.name ? user.name : ''}</StyledText>
+            <StyledText className="text-white text-xl">{user?.displayName ? user.displayName : ''}</StyledText>
             <FontAwesome name="pencil" size={18} color="#7e7e7e" />
           </StyledView>
         </StyledTouchableOpacity>

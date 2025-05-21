@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "leazzy",
+    "scheme": "com.leazzy.app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -23,7 +23,9 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Leazzy needs your location to find properties near you and to mark your property location.",
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "associatedDomains": [],
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,6 +34,20 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.leazzy.app",
+      "googleServicesFile": "./google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.leazzy.app",
+              "host": "oauth2redirect"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyDuT_dlx3fUfPhxSRqFxOZTFHFWWXU0IZI"
@@ -73,7 +89,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "8472a417-2fa7-4c6d-91a9-b08302f97d70"
+        "projectId": "61ab3530-9194-4254-a6cb-ae2f410c491f"
       }
     }
   }

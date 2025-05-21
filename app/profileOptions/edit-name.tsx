@@ -14,8 +14,10 @@ const StyledTextInput = styled(TextInput);
 
 export default function EditNameScreen() {
   const { user, updateUserProfile, isLoading } = useAuth();
-  const [firstName, setFirstName] = useState(user?.name ? user.name.split(' ')[0] : '');
-  const [lastName, setLastName] = useState(user?.name ? user.name.split(' ')[1] || '' : '');
+  const initalName = user?.displayName;
+  console.log('Initial Name:', initalName);
+  const [firstName, setFirstName] = useState(user?.displayName ? user.displayName.split(' ')[0] : '');
+  const [lastName, setLastName] = useState( user.displayName.split(' ')[1] ?  user.displayName.split(' ')[1] : '');
 
   const handleSave = async () => {
     try {
@@ -70,7 +72,7 @@ export default function EditNameScreen() {
         {/* Save Button */}
         <StyledTouchableOpacity
           onPress={handleSave}
-          disabled={isLoading}
+          disabled={isLoading && initalName === `${firstName} ${lastName}` }
           className={`bg-purple-500 rounded-full p-4 items-center ${isLoading ? 'opacity-70' : ''}`}
           style={{ position: 'absolute', bottom: 40, left: 20, right: 20 }}
         >
