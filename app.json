@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "com.leazzy.app",
+    "scheme": "leazzy",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -24,7 +24,9 @@
         "NSLocationWhenInUseUsageDescription": "Leazzy needs your location to find properties near you and to mark your property location.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "associatedDomains": [],
+      "associatedDomains": [
+        "applinks:*.leazzy.app"
+      ],
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
@@ -43,6 +45,20 @@
             {
               "scheme": "com.leazzy.app",
               "host": "oauth2redirect"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "leazzy"
+            },
+            {
+              "scheme": "https",
+              "host": "*.leazzy.app"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
@@ -80,6 +96,12 @@
             "buildToolsVersion": "35.0.0",
             "enableProguardInReleaseBuilds": true
           }
+        }
+      ],
+      [
+        "expo-firebase-core", 
+        {
+          "skipMethodCheck": true
         }
       ]
     ],

@@ -198,8 +198,14 @@ export default function Login() {
     }
     try {
       const confirmation = await signInWithPhoneNumber(auth, trimmed);
-      setVerificationId(confirmation.verificationId);
-      setIsVerifying(true);
+      // Navigate to the phone verification screen with verification ID and phone number
+      router.push({
+        pathname: '/auth/phone-verification',
+        params: { 
+          verificationId: confirmation.verificationId,
+          phoneNumber: trimmed
+        }
+      });
     } catch (error: any) {
       let message = 'Something went wrong. Please try again.';
       if (error.code === 'auth/invalid-phone-number') {

@@ -2,18 +2,22 @@
 import React from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { DatabaseProvider } from '@/contexts/DatabaseContext';
+import { FavoritesProvider } from '@/contexts/FavoritesContext';
 
-// This component provides the necessary wrappers for Tailwind/NativeWind to work properly
+// This component provides the necessary context providers for the app
 interface AppProviderProps {
   children: React.ReactNode;
 }
 
 export default function AppProvider({ children }: AppProviderProps) {
-  // You could add additional providers here if needed
-
   return (
     <AuthProvider>
-      {children}
+      <DatabaseProvider>
+        <FavoritesProvider>
+          {children}
+        </FavoritesProvider>
+      </DatabaseProvider>
     </AuthProvider>
   );
 }

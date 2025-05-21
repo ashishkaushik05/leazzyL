@@ -20,7 +20,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     // Ensure user is authenticated for this route
@@ -28,6 +28,25 @@ export default function TabLayout() {
       router.replace('/');
     }
   }, [isAuthenticated]);
+  
+  // Check email verification status and redirect to verification screen if needed
+  useEffect(() => {
+    // Only check verification if we have a logged-in user with an email
+    if (user && user.email) {
+      // If email is not verified, redirect to verification page
+      if (!user.emailVerified) {
+        // Show verification reminder after a delay
+        const timer = setTimeout(() => {
+          router.push({
+            pathname: '/auth/email-verification',
+            params: { email: user.email }
+          });
+        }, 2000); // Show reminder after 2 seconds
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user?.emailVerified, user?.email]);
 
   return (
     <ProtectedRoute>

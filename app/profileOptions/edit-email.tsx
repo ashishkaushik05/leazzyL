@@ -30,7 +30,14 @@ export default function EditEmailScreen() {
       }
       
       await updateUserProfile({ email });
-      router.back();
+      
+      // Navigate to verification screen
+      router.push({
+        pathname: '/auth/email-verification',
+        params: { 
+          email
+        }
+      });
     } catch (error) {
       Alert.alert('Error', 'Failed to update email');
     }

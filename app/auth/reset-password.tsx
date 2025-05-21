@@ -1,20 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { useAuth } from '../../contexts/AuthContext';
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import { confirmPasswordReset, verifyPasswordResetCode } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
+import CircularGradient from '@/components/CircularGradient';
 
-export default function SetPassword() {
+export default function ResetPassword() {
   const params = useLocalSearchParams();
-  const { firstName, lastName, email, birthDate } = params;
+  const { actionCode, email } = params;
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { initializeUser } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [verificationError, setVerificationError] = useState('');
+
+  // Verify the password reset code is valid
+  useEffect(() => {
+    const verifyCode = async () => {
+      if (!actionCode) {
+        setVerificationError('No action code provided');
+        setIsVerifying(false);
+        return;
+      }
+
+      try {
+        // Verify the password reset code
+        await verifyPasswordResetCode(auth, actionCode as string);
+        setIsVerifying(false);
+      } catch (error: any) {
+        console.error('Error verifying reset code:', error);
+        setVerificationError('This reset link is invalid or has expired. Please request a new password reset.');
+        setIsVerifying(false);
+      }
+    };
+
+    verifyCode();
+  }, [actionCode]);
 
   // Password validation function
   const validatePassword = (password: string) => {
@@ -65,7 +91,7 @@ export default function SetPassword() {
     }
   };
 
-  const handleCreateAccount = async () => {
+  const handleResetPassword = async () => {
     // Password validation
     if (!validatePassword(password)) {
       Alert.alert(
@@ -82,72 +108,86 @@ export default function SetPassword() {
       return;
     }
 
+    setIsLoading(true);
     try {
-      // Create user in Firebase with email and password
-      const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        email as string, 
-        password
+      // Reset the password using the action code
+      await confirmPasswordReset(auth, actionCode as string, password);
+      
+      // Show success message
+      Alert.alert(
+        'Password Reset',
+        'Your password has been reset successfully. Please login with your new password.',
+        [
+          {
+            text: 'Go to Login',
+            onPress: () => router.replace('/auth/login'),
+          },
+        ]
       );
-      
-      // Update user profile with name
-      await updateProfile(userCredential.user, {
-        displayName: `${firstName} ${lastName}`,
-      });
-
-      // You could store additional user data in Firestore/database here
-      // e.g., birthDate, etc.
-
-      // Send verification email
-      await sendEmailVerification(userCredential.user);
-      
-      // Initialize the user without redirecting to tabs
-      await initializeUser(userCredential.user);
-      
-      // Navigate to email verification screen
-      router.push({
-        pathname: '/auth/email-verification',
-        params: { email: email as string }
-      });
     } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
-        Alert.alert(
-          'Account Exists',
-          'You already have an account. Please login.',
-          [
-            {
-              text: 'Go to Login',
-              onPress: () => router.replace('/auth/login'),
-            },
-          ],
-        );
-      } else {
-        Alert.alert('Error', error.message || 'Something went wrong.');
-      }
-      console.error('Error creating user:', error);
+      console.error('Error resetting password:', error);
+      Alert.alert(
+        'Error',
+        'Failed to reset password. The link may have expired. Please try requesting a new password reset.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const passwordStrength = getPasswordStrength(password);
   const strengthColor = getStrengthColor(passwordStrength);
 
+  if (isVerifying) {
+    return (
+      <View style={styles.container}>
+        <CircularGradient />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#9370db" />
+          <Text style={styles.loadingText}>Verifying reset link...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (verificationError) {
+    return (
+      <View style={styles.container}>
+        <CircularGradient />
+        <View style={styles.errorContainer}>
+          <FontAwesome name="exclamation-triangle" size={60} color="#ff4d4d" />
+          <Text style={styles.errorTitle}>Link Invalid</Text>
+          <Text style={styles.errorMessage}>{verificationError}</Text>
+          <TouchableOpacity 
+            style={styles.loginButton}
+            onPress={() => router.replace('/auth/login')}
+          >
+            <Text style={styles.buttonText}>Back to Login</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      <CircularGradient />
+      
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <FontAwesome name="arrow-left" size={24} color="white" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Set Password</Text>
-      <Text style={styles.subtitle}>Create a secure password</Text>
+      <Text style={styles.title}>Reset Password</Text>
+      <Text style={styles.subtitle}>Create a new password for {email}</Text>
 
       <View style={styles.form}>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Create password"
+            placeholder="Create new password"
             placeholderTextColor="#999"
             secureTextEntry={!showPassword}
             value={password}
@@ -164,7 +204,15 @@ export default function SetPassword() {
         {password.length > 0 && (
           <>
             <View style={styles.strengthBarContainer}>
-              <View style={[styles.strengthBar, { backgroundColor: strengthColor, width: `${(password.length > 0 ? getPasswordStrength(password).split(' ')[0] === 'Very' ? (getPasswordStrength(password).split(' ')[1] === 'Weak' ? 20 : 100) : getPasswordStrength(password) === 'Weak' ? 40 : getPasswordStrength(password) === 'Medium' ? 60 : getPasswordStrength(password) === 'Strong' ? 80 : 0 : 0)}%` }]} />
+              <View style={[styles.strengthBar, { 
+                backgroundColor: strengthColor, 
+                width: `${(password.length > 0 ? 
+                  getPasswordStrength(password).split(' ')[0] === 'Very' ? 
+                    (getPasswordStrength(password).split(' ')[1] === 'Weak' ? 20 : 100) : 
+                    getPasswordStrength(password) === 'Weak' ? 40 : 
+                    getPasswordStrength(password) === 'Medium' ? 60 : 
+                    getPasswordStrength(password) === 'Strong' ? 80 : 0 : 0)}%` 
+              }]} />
             </View>
             <Text style={[styles.strengthText, { color: strengthColor }]}>{passwordStrength}</Text>
             <Text style={styles.passwordRequirements}>
@@ -176,7 +224,7 @@ export default function SetPassword() {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Confirm password"
+            placeholder="Confirm new password"
             placeholderTextColor="#999"
             secureTextEntry={!showConfirmPassword}
             value={confirmPassword}
@@ -196,13 +244,17 @@ export default function SetPassword() {
 
         <TouchableOpacity 
           style={[
-            styles.createButton, 
-            (!password || !confirmPassword || password !== confirmPassword) && styles.disabledButton
+            styles.resetButton, 
+            (isLoading || !password || !confirmPassword || password !== confirmPassword) && styles.disabledButton
           ]} 
-          onPress={handleCreateAccount}
-          disabled={!password || !confirmPassword || password !== confirmPassword}
+          onPress={handleResetPassword}
+          disabled={isLoading || !password || !confirmPassword || password !== confirmPassword}
         >
-          <Text style={styles.buttonText}>Create Account</Text>
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Reset Password</Text>
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -214,6 +266,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1c1c1c',
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 20,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  errorTitle: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  errorMessage: {
+    color: '#bbb',
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 20,
+    lineHeight: 24,
+  },
+  loginButton: {
+    backgroundColor: '#9370db',
+    padding: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginTop: 20,
   },
   backButton: {
     marginTop: 40,
@@ -274,7 +364,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 15,
   },
-  createButton: {
+  resetButton: {
     backgroundColor: '#9370db',
     padding: 15,
     borderRadius: 25,

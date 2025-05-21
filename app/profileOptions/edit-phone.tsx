@@ -23,10 +23,20 @@ export default function EditPhoneScreen() {
         return;
       }
       
-      await updateUserProfile({ phone: phoneNumber });
-      router.back();
+      // Send verification code to the phone number
+      const { sendPhoneVerification } = useAuth();
+      const verificationId = await sendPhoneVerification(phoneNumber);
+      
+      // Navigate to verification screen
+      router.push({
+        pathname: '/auth/phone-verification',
+        params: { 
+          phoneNumber,
+          verificationId
+        }
+      });
     } catch (error) {
-      Alert.alert('Error', 'Failed to update phone number');
+      Alert.alert('Error', 'Failed to send verification code to phone number');
     }
   };
 
